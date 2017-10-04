@@ -54,8 +54,8 @@ function createPanZoom(domElement, options) {
   var zoomDoubleClickSpeed = typeof options.zoomDoubleClickSpeed === 'number' ? options.zoomDoubleClickSpeed : defaultDoubleTapZoomSpeed
   var beforeWheel = options.beforeWheel || noop
   var speed = typeof options.zoomSpeed === 'number' ? options.zoomSpeed : defaultZoomSpeed
-
-  var suppressPanForEvent = options.suppressPanForEvent
+  
+  var suppressPan = typeof options.suppressPan === 'function' ? options.suppressPan: undefined
 
   validateBounds(bounds)
 
@@ -536,8 +536,8 @@ function createPanZoom(domElement, options) {
 
     // if suppress function is provided, pan will start only if it
     // evaluates to false
-    if (suppressPanForEvent) {
-      if (suppressPanForEvent(e)) {
+    if (suppressPan) {
+      if (suppressPan(e)) {
         e.stopPropagation()
         return false;
       }
@@ -577,9 +577,9 @@ function createPanZoom(domElement, options) {
   }
 
   function onMouseUp() {
-    releaseDocumentMouse()
     preventTextSelection.release()
     triggerPanEnd()
+    releaseDocumentMouse()
   }
 
   function releaseDocumentMouse() {

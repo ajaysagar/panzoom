@@ -527,6 +527,7 @@ function createPanZoom(domElement, options) {
   }
 
   function onMouseDown(e) {
+
     if (touchInProgress) {
       // modern browsers will fire mousedown for touch events too
       // we do not want this: touch is handled separately.
@@ -538,6 +539,7 @@ function createPanZoom(domElement, options) {
     // evaluates to false
     if (suppressPan) {
       if (suppressPan(e)) {
+        releaseDocumentMouse()
         e.stopPropagation()
         return false;
       }

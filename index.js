@@ -56,6 +56,8 @@ function createPanZoom(domElement, options) {
   var speed = typeof options.zoomSpeed === 'number' ? options.zoomSpeed : defaultZoomSpeed
   
   var suppressPan = typeof options.suppressPan === 'function' ? options.suppressPan: undefined
+  var beforeTransform = typeof options.beforeTransform === 'function' ? options.beforeTransform: undefined
+
 
   validateBounds(bounds)
 
@@ -253,6 +255,11 @@ function createPanZoom(domElement, options) {
 
   function makeDirty() {
     isDirty = true
+
+    if(beforeTransform) {
+      beforeTransform(transform)
+    }
+
     frameAnimation = window.requestAnimationFrame(frame)
   }
 

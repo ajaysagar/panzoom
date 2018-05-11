@@ -58,6 +58,8 @@ function createPanZoom(domElement, options) {
   var suppressPan = typeof options.suppressPan === 'function' ? options.suppressPan: undefined
   var beforeTransform = typeof options.beforeTransform === 'function' ? options.beforeTransform: undefined
 
+  var xOffset = options.xOffset || 0
+  var yOffset = options.yOffset || 0
 
   validateBounds(bounds)
 
@@ -106,6 +108,14 @@ function createPanZoom(domElement, options) {
     zoomAbs: zoomAbs,
     getTransform: getTransformModel,
     showRectangle: showRectangle
+  }
+
+  function offsetX(x) {
+    return x - xOffset
+  }
+
+  function offsetY(y) {
+    return y - yOffset
   }
 
   function showRectangle(rect) {
@@ -527,7 +537,7 @@ function createPanZoom(domElement, options) {
   }
 
   function onDoubleClick(e) {
-    smoothZoom(e.clientX, e.clientY, zoomDoubleClickSpeed)
+    smoothZoom(offsetX(e.clientX), offsetY(e.clientY), zoomDoubleClickSpeed)
 
     e.preventDefault()
     e.stopPropagation()
@@ -557,8 +567,8 @@ function createPanZoom(domElement, options) {
     var isLeftButton = ((e.button === 1 && window.event !== null) || e.button === 0)
     if (!isLeftButton) return
 
-    mouseX = e.clientX
-    mouseY = e.clientY
+    mouseX = offsetX(e.clientX)
+    mouseY = offsetY(e.clientY)
 
     // We need to listen on document itself, since mouse can go outside of the
     // window, and we will loose it
@@ -576,11 +586,11 @@ function createPanZoom(domElement, options) {
 
     triggerPanStart()
 
-    var dx = e.clientX - mouseX
-    var dy = e.clientY - mouseY
+    var dx = offsetX(e.clientX) - mouseX
+    var dy = offsetY(e.clientY) - mouseY
 
-    mouseX = e.clientX
-    mouseY = e.clientY
+    mouseX = offsetX(e.clientX)
+    mouseY = offsetY(e.clientY)
 
     internalMoveBy(dx, dy)
   }
@@ -614,7 +624,7 @@ function createPanZoom(domElement, options) {
     var scaleMultiplier = getScaleMultiplier(e.deltaY)
 
     if (scaleMultiplier !== 1) {
-      publicZoomTo(e.clientX, e.clientY, scaleMultiplier)
+      publicZoomTo(offsetX(e.clientX), offsetY(e.clientY), scaleMultiplier)
       e.preventDefault()
     }
   }

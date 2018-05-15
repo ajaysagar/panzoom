@@ -54,9 +54,9 @@ function createPanZoom(domElement, options) {
   var zoomDoubleClickSpeed = typeof options.zoomDoubleClickSpeed === 'number' ? options.zoomDoubleClickSpeed : defaultDoubleTapZoomSpeed
   var beforeWheel = options.beforeWheel || noop
   var speed = typeof options.zoomSpeed === 'number' ? options.zoomSpeed : defaultZoomSpeed
-  
-  var suppressPan = typeof options.suppressPan === 'function' ? options.suppressPan: undefined
-  var beforeTransform = typeof options.beforeTransform === 'function' ? options.beforeTransform: undefined
+
+  var suppressPan = typeof options.suppressPan === 'function' ? options.suppressPan : undefined
+  var beforeTransform = typeof options.beforeTransform === 'function' ? options.beforeTransform : undefined
 
   var xOffset = options.xOffset || 0
   var yOffset = options.yOffset || 0
@@ -85,7 +85,7 @@ function createPanZoom(domElement, options) {
   var smoothScroll
   if ('smoothScroll' in options && !options.smoothScroll) {
     // If user explicitly asked us not to use smooth scrolling, we obey
-    smoothScroll = rigidScroll() 
+    smoothScroll = rigidScroll()
   } else {
     // otherwise we use forward smoothScroll settings to kinetic API
     // which makes scroll smoothing.
@@ -124,11 +124,11 @@ function createPanZoom(domElement, options) {
     var h = owner.clientHeight
     var rectWidth = rect.right - rect.left;
     var rectHeight = rect.bottom - rect.top;
-    var dh = h/rectHeight
-    var dw = w/rectWidth
+    var dh = h / rectHeight
+    var dw = w / rectWidth
     var scale = Math.min(dw, dh)
-    transform.x = -(rect.left + rectWidth/2) * scale + w/2
-    transform.y = -(rect.top + rectHeight/2) * scale + h/2
+    transform.x = -(rect.left + rectWidth / 2) * scale + w / 2
+    transform.y = -(rect.top + rectHeight / 2) * scale + h / 2
     transform.scale = scale
   }
 
@@ -150,11 +150,11 @@ function createPanZoom(domElement, options) {
       h = owner.clientHeight
     }
     var bbox = domController.getBBox()
-    var dh = h/bbox.height
-    var dw = w/bbox.width
+    var dh = h / bbox.height
+    var dw = w / bbox.width
     var scale = Math.min(dw, dh)
-    transform.x = -(bbox.left + bbox.width/2) * scale + w/2 + left
-    transform.y = -(bbox.top + bbox.height/2) * scale + h/2 + top
+    transform.x = -(bbox.left + bbox.width / 2) * scale + w / 2 + left
+    transform.y = -(bbox.top + bbox.height / 2) * scale + h / 2 + top
     transform.scale = scale
   }
 
@@ -266,8 +266,10 @@ function createPanZoom(domElement, options) {
   function makeDirty() {
     isDirty = true
 
-    if(beforeTransform) {
-      beforeTransform(transform)
+    if (beforeTransform) {
+      window.requestAnimationFrame(() => {
+        beforeTransform(transform)
+      })
     }
 
     frameAnimation = window.requestAnimationFrame(frame)
@@ -320,12 +322,12 @@ function createPanZoom(domElement, options) {
     if (!parent) throw new Error('ui element is required to be within the scene')
 
     var clientRect = ui.getBoundingClientRect()
-    var cx = clientRect.left + clientRect.width/2
-    var cy = clientRect.top + clientRect.height/2
+    var cx = clientRect.left + clientRect.width / 2
+    var cy = clientRect.top + clientRect.height / 2
 
     var container = parent.getBoundingClientRect()
-    var dx = container.width/2 - cx
-    var dy = container.height/2 - cy
+    var dx = container.width / 2 - cx
+    var dy = container.height / 2 - cy
 
     internalMoveBy(dx, dy, true)
   }
@@ -338,12 +340,12 @@ function createPanZoom(domElement, options) {
     if (moveByAnimation) moveByAnimation.cancel()
 
     var from = { x: 0, y: 0 }
-    var to = { x: dx, y : dy }
+    var to = { x: dx, y: dy }
     var lastX = 0
     var lastY = 0
 
     moveByAnimation = animate(from, to, {
-      step: function(v) {
+      step: function (v) {
         moveBy(v.x - lastX, v.y - lastY)
 
         lastX = v.x
@@ -433,7 +435,7 @@ function createPanZoom(domElement, options) {
 
     if (z) {
       var scaleMultiplier = getScaleMultiplier(z)
-      publicZoomTo(owner.clientWidth/2, owner.clientHeight/2, scaleMultiplier)
+      publicZoomTo(owner.clientWidth / 2, owner.clientHeight / 2, scaleMultiplier)
     }
   }
 
@@ -446,7 +448,7 @@ function createPanZoom(domElement, options) {
       e.preventDefault()
 
       pinchZoomLength = getPinchZoomLength(e.touches[0], e.touches[1])
-      multitouch  = true;
+      multitouch = true;
       startTouchListenerIfNeeded()
     }
   }
@@ -502,8 +504,8 @@ function createPanZoom(domElement, options) {
 
       var scaleMultiplier = getScaleMultiplier(delta)
 
-      mouseX = (t1.clientX + t2.clientX)/2
-      mouseY = (t1.clientY + t2.clientY)/2
+      mouseX = (t1.clientX + t2.clientX) / 2
+      mouseY = (t1.clientY + t2.clientY) / 2
 
       publicZoomTo(mouseX, mouseY, scaleMultiplier)
 
@@ -630,34 +632,34 @@ function createPanZoom(domElement, options) {
   }
 
   function smoothZoom(clientX, clientY, scaleMultiplier) {
-      var fromValue = transform.scale
-      var from = {scale: fromValue}
-      var to = {scale: scaleMultiplier * fromValue}
+    var fromValue = transform.scale
+    var from = { scale: fromValue }
+    var to = { scale: scaleMultiplier * fromValue }
 
-      smoothScroll.cancel()
-      cancelZoomAnimation()
+    smoothScroll.cancel()
+    cancelZoomAnimation()
 
-      // TODO: should consolidate this and publicZoomTo
-      triggerEvent('zoom')
+    // TODO: should consolidate this and publicZoomTo
+    triggerEvent('zoom')
 
-      zoomToAnimation = animate(from, to, {
-        step: function(v) {
-          zoomAbs(clientX, clientY, v.scale)
-        }
-      })
+    zoomToAnimation = animate(from, to, {
+      step: function (v) {
+        zoomAbs(clientX, clientY, v.scale)
+      }
+    })
   }
 
   function publicZoomTo(clientX, clientY, scaleMultiplier) {
-      smoothScroll.cancel()
-      cancelZoomAnimation()
-      return zoomByRatio(clientX, clientY, scaleMultiplier)
+    smoothScroll.cancel()
+    cancelZoomAnimation()
+    return zoomByRatio(clientX, clientY, scaleMultiplier)
   }
 
   function cancelZoomAnimation() {
-      if (zoomToAnimation) {
-          zoomToAnimation.cancel()
-          zoomToAnimation = null
-      }
+    if (zoomToAnimation) {
+      zoomToAnimation.cancel()
+      zoomToAnimation = null
+    }
   }
 
   function getScaleMultiplier(delta) {

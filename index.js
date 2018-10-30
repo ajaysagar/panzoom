@@ -347,7 +347,7 @@ function createPanZoom(domElement, options) {
     isDirty = true;
 
     if (beforeTransform) {
-      window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(function() {
         beforeTransform(transform);
       });
     }

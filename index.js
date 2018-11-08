@@ -86,6 +86,9 @@ function createPanZoom(domElement, options) {
     typeof options.beforeTransform === "function"
       ? options.beforeTransform
       : undefined;
+  var xOffset = options.xOffset;
+  var yOffset = options.yOffset;
+  var calculateOffset = xOffset === undefined || yOffset === undefined;
 
   validateBounds(bounds);
 
@@ -160,14 +163,6 @@ function createPanZoom(domElement, options) {
 
   function isPaused() {
     return paused;
-  }
-
-  function offsetX(x) {
-    return x - xOffset;
-  }
-
-  function offsetY(y) {
-    return y - yOffset;
   }
 
   function showRectangle(rect) {
@@ -766,6 +761,9 @@ function createPanZoom(domElement, options) {
   }
 
   function getOffsetXY(e) {
+    if (!calculateOffset) {
+      return { x: e.clientX - xOffset, y: e.clientY - yOffset };
+    }
     var offsetX, offsetY;
     // I tried using e.offsetX, but that gives wrong results for svg, when user clicks on a path.
     var ownerRect = owner.getBoundingClientRect();

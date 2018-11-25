@@ -82,6 +82,11 @@ function createPanZoom(domElement, options) {
 
   var suppressPan =
     typeof options.suppressPan === "function" ? options.suppressPan : undefined;
+  var touchDragDuration =
+    typeof options.touchDragDuration === "number"
+      ? options.touchDragDuration
+      : 0;
+
   var beforeTransform =
     typeof options.beforeTransform === "function"
       ? options.beforeTransform
@@ -101,6 +106,12 @@ function createPanZoom(domElement, options) {
   var lastTouchEndTime = 0;
 
   var touchInProgress = false;
+
+  var touchDragSelection = {
+    inProgress: false,
+    complete: false,
+    target: null
+  };
 
   // We only need to fire panstart when actual move happens
   var panstartFired = false;
@@ -572,6 +583,7 @@ function createPanZoom(domElement, options) {
 
     smoothScroll.cancel();
     startTouchListenerIfNeeded();
+    startTouchSelectionListenerIfNeeded(e);
   }
 
   function startTouchListenerIfNeeded() {
@@ -583,7 +595,35 @@ function createPanZoom(domElement, options) {
     }
   }
 
+  function isTargetDraggable(e) {
+    return options.onTouch && !options.onTouch(e);
+  }
+
+  function dispatchTouchDragEvent(target, type) {
+    target.dispatchEvent(
+      new CustomEvent(type, {
+        bubbles: true
+      })
+    );
+  }
+
+  function startTouchSelectionListenerIfNeeded(e) {
+    if (options.onTouch) {
+      if (touchDragDuration && isTargetDraggable(e)) {
+        touchDragSelection.inProgress = true;
+        setTimeout(function() {
+          if (touchDragSelection.inProgress) {
+            touchDragSelection.inProgress = false;
+            touchDragSelection.target = e.target;
+            dispatchTouchDragEvent(e.target, "touchdragselect");
+          }
+        }, touchDragDuration);
+      }
+    }
+  }
+
   function handleTouchMove(e) {
+    touchDragSelection.inProgress = false;
     if (e.touches.length === 1) {
       e.stopPropagation();
       var touch = e.touches[0];
@@ -594,12 +634,19 @@ function createPanZoom(domElement, options) {
       var dy = offset.y - mouseY;
 
       if (dx !== 0 && dy !== 0) {
-        triggerPanStart();
+        if (!touchDragSelection.target) {
+          triggerPanStart();
+          mouseX = offset.x;
+          mouseY = offset.y;
+          var point = transformToScreen(dx, dy);
+          internalMoveBy(point.x, point.y);
+        } else {
+          if (isTargetDraggable(e) && !touchDragSelection.complete) {
+            dispatchTouchDragEvent(e.target, "touchdragstart");
+            touchDragSelection.complete = true;
+          }
+        }
       }
-      mouseX = offset.x;
-      mouseY = offset.y;
-      var point = transformToScreen(dx, dy);
-      internalMoveBy(point.x, point.y);
     } else if (e.touches.length === 2) {
       // it's a zoom, let's find direction
       multitouch = true;
@@ -634,6 +681,11 @@ function createPanZoom(domElement, options) {
   }
 
   function handleTouchEnd(e) {
+    touchDragSelection = {
+      inProgress: false,
+      complete: false,
+      target: null
+    };
     if (e.touches.length > 0) {
       var offset = getOffsetXY(e.touches[0]);
       mouseX = offset.x;

@@ -82,6 +82,10 @@ function createPanZoom(domElement, options) {
 
   var suppressPan =
     typeof options.suppressPan === "function" ? options.suppressPan : undefined;
+  var onClickWithoutPan =
+    typeof options.onClickWithoutPan === "function"
+      ? options.onClickWithoutPan
+      : undefined;
   var touchDragDuration =
     typeof options.touchDragDuration === "number"
       ? options.touchDragDuration
@@ -875,6 +879,8 @@ function createPanZoom(domElement, options) {
       // we should never run smooth scrolling if it was multitouch (pinch zoom animation):
       if (!multitouch) smoothScroll.stop();
       triggerEvent("panend");
+    } else {
+      onClickWithoutPan();
     }
   }
 

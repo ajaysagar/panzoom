@@ -729,12 +729,8 @@ function createPanZoom(domElement, options) {
 
     // if suppress function is provided, pan will start only if it
     // evaluates to false
-    if (suppressPan) {
-      if (suppressPan(e)) {
-        releaseDocumentMouse();
-        e.stopPropagation();
-        return false;
-      }
+    if (suppressPan && suppressPan(e)) {
+      return false;
     }
 
     // for IE, left click == 1

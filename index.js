@@ -777,9 +777,9 @@ function createPanZoom(domElement, options) {
     internalMoveBy(dx, dy);
   }
 
-  function onMouseUp() {
+  function onMouseUp(e) {
     preventTextSelection.release();
-    triggerPanEnd();
+    triggerPanEnd(e);
     releaseDocumentMouse();
   }
 
@@ -874,13 +874,13 @@ function createPanZoom(domElement, options) {
     }
   }
 
-  function triggerPanEnd() {
+  function triggerPanEnd(e) {
     if (panstartFired) {
       // we should never run smooth scrolling if it was multitouch (pinch zoom animation):
       if (!multitouch) smoothScroll.stop();
       triggerEvent("panend");
     } else {
-      onClickWithoutPan();
+      onClickWithoutPan(e);
     }
   }
 

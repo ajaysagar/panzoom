@@ -152,6 +152,7 @@ function createPanZoom(domElement, options) {
     zoomTo: publicZoomTo,
     zoomAbs: zoomAbs,
     smoothZoom: smoothZoom,
+    smoothTransform: smoothTransform,
     getTransform: getTransformModel,
     showRectangle: showRectangle,
 
@@ -267,6 +268,25 @@ function createPanZoom(domElement, options) {
 
     triggerEvent("pan");
     makeDirty();
+  }
+
+  function smoothTransform(targetTransform, done) {
+    animate(transform, targetTransform, {
+      step: function(t) {
+        transform = t;
+        makeDirty();
+      },
+      done: function(t) {
+        transform = t;
+        makeDirty();
+        if (typeof done === "function") {
+          window.requestAnimationFrame(function() {
+            done();
+          });
+        }
+      },
+      easing: "easeInOut"
+    });
   }
 
   function moveBy(dx, dy) {

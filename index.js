@@ -271,6 +271,7 @@ function createPanZoom(domElement, options) {
   }
 
   function smoothTransform(targetTransform, done) {
+    smoothScroll.cancel();
     animate(transform, targetTransform, {
       step: function(t) {
         transform = t;
